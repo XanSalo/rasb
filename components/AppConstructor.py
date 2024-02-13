@@ -6,7 +6,7 @@ from time import strftime
 class AppConstructor(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
-
+        #self.ditc = ModbusMaster().read_data(1,0,6)
         self.geometry("800x480")
         self.configure(bg='#262626')
         self.frame_menu = tk.Frame(self, bg='white', height=30, width=800)
@@ -152,7 +152,7 @@ class AppConstructor(tk.Tk):
                                    height=1, width=6,
                                    bg='#8EF6F2',
                                    fg='#032222',
-                                   activebackground='#4BB2AE', relief=RAISED)
+                                   activebackground='#4BB2AE', relief=RAISED,command=self.send_values_to_modbus)
         self.button_ok.place(x=90, y=250)
 
         #
@@ -324,7 +324,7 @@ class AppConstructor(tk.Tk):
         self.tab3.place(x=320, y=0)
         self.tab4.place(x=480, y=0)
         self.tab5.place(x=640, y=0)
-        # self.update_temp_label()
+        self.update_temp_label()
         self.time()
 
     def increase(self, lbl_value, value):
@@ -354,23 +354,28 @@ class AppConstructor(tk.Tk):
         self.lbl.config(text=string)
         self.lbl.after(1000, self.time)
 
-    # def update_temp_label(self):
-    #
-    #     # Fetch new data
-    #
-    #     self.ditc = ModbusMaster().read_data(1,0,6)
-    #
-    #     # Assuming the temperature value is at a specific index, e.g., 0
-    #
-    #
-    #     # Update label_temp1 with the new value
-    #     self.label_temp1.configure(text=f"t1= {round(self.ditc[0] / 100, 2)}")
-    #     self.label_temp2.configure(text=f"t2= {round(self.ditc[1] / 100, 2)}")
-    #     self.label_temp3.configure(text=f"t3= {round(self.ditc[2] / 100, 2)}")
-    #     self.label_temp4.configure(text=f"t4= {round(self.ditc[3] / 100, 2)}")
-    #
-    #     # Call update_temp_label again after a delay (e.g., 1000ms)
-    #     self.after(1000, self.update_temp_label)
+    def send_values_to_modbus(self):
+        self.ditc[4]=int(float(self.label_temp_value.cget("text"))*10)
+        ModbusMaster().send_data(1,0,self.ditc)
+
+    def update_temp_label(self):
+
+        # Fetch new data
+
+        self.ditc = list(ModbusMaster().read_data(1,0,6))
+
+        # Assuming the temperature value is at a specific index, e.g., 0
+
+
+        # Update label_temp1 with the new value
+        self.label_temp1.configure(text=f"t1= {round(self.ditc[0] / 100, 2)}")
+        self.label_temp2.configure(text=f"t2= {round(self.ditc[1] / 100, 2)}")
+        self.label_temp3.configure(text=f"t3= {round(self.ditc[2] / 100, 2)}")
+        self.label_temp4.configure(text=f"t4= {round(self.ditc[3] / 100, 2)}")
+        self.label_uv.configure(text=f"{round(self.ditc[4] / 10, 2)}")
+        
+        # Call update_temp_label again after a delay (e.g., 1000ms)
+        self.after(1000, self.update_temp_label)
 
 
 if __name__ == "__main__":
