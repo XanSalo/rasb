@@ -1,12 +1,12 @@
 import tkinter as tk
 from tkinter import *
 from ModbusExtract import ModbusMaster
-
+from time import strftime
 
 class AppConstructor(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
-        
+
         self.geometry("800x480")
         self.configure(bg='#262626')
         self.frame_menu = tk.Frame(self, bg='white', height=30, width=800)
@@ -63,73 +63,90 @@ class AppConstructor(tk.Tk):
                                           bg='#8EF6F2',
                                           fg='#032222',
                                           activebackground='#4BB2AE', relief=RAISED)
+
         self.frame_temp_set_element = tk.Frame(master=self.frame_set_panel, width=235, height=59, bg='#7FADFC')
         self.frame_temp_set_element.place(x=0, y=0)
-        self.label_temp_set_element = tk.Label(self.frame_temp_set_element, text="T°C=", height=4, width=10)
+        self.label_temp_set_element = tk.Label(self.frame_temp_set_element, text="T°C=", height=4, width=10, anchor="e")
         self.label_temp_set_element.place(x=0, y=0)
+        self.label_temp_value = tk.Label(self.frame_temp_set_element, text="0", height=4, width=8)
+        self.label_temp_value.place(x=80, y=0)
         self.button_temp_plus = tk.Button(self.frame_temp_set_element, text="∧", font=("bold", 9), anchor=CENTER,
                                           height=1, width=3,
                                           bg='#8EF6F2',
                                           fg='#032222',
                                           activebackground='#4BB2AE', relief=RAISED)
-        self.button_temp_plus.place(x=100, y=2)
+        self.button_temp_plus.bind(sequence="<Button-1>", func=lambda event: self.increase(self.label_temp_value,1))
+        self.button_temp_plus.place(x=150, y=2)
         self.button_temp_minus = tk.Button(self.frame_temp_set_element, text="∨", font=("bold", 9), anchor=CENTER,
                                            height=1, width=3,
                                            bg='#8EF6F2',
                                            fg='#032222',
                                            activebackground='#4BB2AE', relief=RAISED)
-        self.button_temp_minus.place(x=100, y=30)
+        self.button_temp_minus.bind(sequence="<Button-1>", func=lambda event: self.decrease(self.label_temp_value,1))
+        self.button_temp_minus.place(x=150, y=30)
 
         self.frame_time_work = tk.Frame(master=self.frame_set_panel, width=235, height=59, bg='#7FADFC')
         self.frame_time_work.place(x=0, y=60)
-        self.label_time_work = tk.Label(self.frame_time_work, text="tч=", height=4, width=10)
+        self.label_time_work = tk.Label(self.frame_time_work, text="tч=", height=4, width=10, anchor="e")
         self.label_time_work.place(x=0, y=0)
+        self.label_time_value = tk.Label(self.frame_time_work, text="0", height=4, width=8)
+        self.label_time_value.place(x=80, y=0)
         self.button_time_plus = tk.Button(self.frame_time_work, text="∧", font=("bold", 9), anchor=CENTER,
                                           height=1, width=3,
                                           bg='#8EF6F2',
                                           fg='#032222',
                                           activebackground='#4BB2AE', relief=RAISED)
-        self.button_time_plus.place(x=100, y=2)
+        self.button_time_plus.bind(sequence="<Button-1>", func=lambda event: self.increase(self.label_time_value,0))
+        self.button_time_plus.place(x=150, y=2)
         self.button_time_minus = tk.Button(self.frame_time_work, text="∨", font=("bold", 9), anchor=CENTER,
                                            height=1, width=3,
                                            bg='#8EF6F2',
                                            fg='#032222',
                                            activebackground='#4BB2AE', relief=RAISED)
-        self.button_time_minus.place(x=100, y=30)
+        self.button_time_minus.bind(sequence="<Button-1>", func=lambda event: self.decrease(self.label_time_value,0))
+        self.button_time_minus.place(x=150, y=30)
 
         self.frame_period_uv = tk.Frame(master=self.frame_set_panel, width=235, height=59, bg='#7FADFC')
         self.frame_period_uv.place(x=0, y=120)
-        self.label_period_uv = tk.Label(self.frame_period_uv, text="Tuv=", height=4, width=10)
+        self.label_period_uv = tk.Label(self.frame_period_uv, text="Euv=", height=4, width=10, anchor="e")
         self.label_period_uv.place(x=0, y=0)
+        self.label_uv_value = tk.Label(self.frame_period_uv, text="0", height=4, width=8)
+        self.label_uv_value.place(x=80, y=0)
         self.button_uv_plus = tk.Button(self.frame_period_uv, text="∧", font=("bold", 9), anchor=CENTER,
                                         height=1, width=3,
                                         bg='#8EF6F2',
                                         fg='#032222',
                                         activebackground='#4BB2AE', relief=RAISED)
-        self.button_uv_plus.place(x=100, y=2)
+        self.button_uv_plus.bind(sequence="<Button-1>", func=lambda event: self.increase(self.label_uv_value,0))
+        self.button_uv_plus.place(x=150, y=2)
         self.button_uv_minus = tk.Button(self.frame_period_uv, text="∨", font=("bold", 9), anchor=CENTER,
                                          height=1, width=3,
                                          bg='#8EF6F2',
                                          fg='#032222',
                                          activebackground='#4BB2AE', relief=RAISED)
-        self.button_uv_minus.place(x=100, y=30)
+        self.button_uv_minus.bind(sequence="<Button-1>", func=lambda event: self.decrease(self.label_uv_value, 0))
+        self.button_uv_minus.place(x=150, y=30)
 
         self.frame_period_read = tk.Frame(master=self.frame_set_panel, width=235, height=59, bg='#7FADFC')
         self.frame_period_read.place(x=0, y=180)
-        self.label_period_read = tk.Label(self.frame_period_read, text="Tсчит=", height=4, width=10)
+        self.label_period_read = tk.Label(self.frame_period_read, text="Tсчит=", height=4, width=10, anchor="e")
         self.label_period_read.place(x=0, y=0)
+        self.label_read_value = tk.Label(self.frame_period_read, text="0", height=4, width=8)
+        self.label_read_value.place(x=80, y=0)
         self.button_read_plus = tk.Button(self.frame_period_read, text="∧", font=("bold", 9), anchor=CENTER,
                                           height=1, width=3,
                                           bg='#8EF6F2',
                                           fg='#032222',
                                           activebackground='#4BB2AE', relief=RAISED)
-        self.button_read_plus.place(x=100, y=2)
+        self.button_read_plus.bind(sequence="<Button-1>", func=lambda event: self.increase(self.label_read_value,0))
+        self.button_read_plus.place(x=150, y=2)
         self.button_read_minus = tk.Button(self.frame_period_read, text="∨", font=("bold", 9), anchor=CENTER,
                                            height=1, width=3,
                                            bg='#8EF6F2',
                                            fg='#032222',
                                            activebackground='#4BB2AE', relief=RAISED)
-        self.button_read_minus.place(x=100, y=30)
+        self.button_read_minus.bind(sequence="<Button-1>", func=lambda event: self.decrease(self.label_read_value, 0))
+        self.button_read_minus.place(x=150, y=30)
 
         self.button_ok = tk.Button(self.frame_set_panel, text="ok", font=("bold", 12), anchor=CENTER,
                                    height=1, width=6,
@@ -141,54 +158,68 @@ class AppConstructor(tk.Tk):
         #
         self.frame_set_ph = tk.Frame(master=self.frame_set_panel, width=235, height=59, bg='#7FADFC')
         self.frame_set_ph.place(x=235, y=0)
-        self.label_set_ph = tk.Label(self.frame_set_ph, text="Ph=", height=4, width=10)
+        self.label_set_ph = tk.Label(self.frame_set_ph, text="Ph=", height=4, width=10, anchor="e")
         self.label_set_ph.place(x=0, y=0)
+        self.label_ph_value = tk.Label(self.frame_set_ph, text="0", height=4, width=8)
+        self.label_ph_value.place(x=80, y=0)
         self.button_ph_plus = tk.Button(self.frame_set_ph, text="∧", font=("bold", 9), anchor=CENTER,
                                         height=1, width=3,
                                         bg='#8EF6F2',
                                         fg='#032222',
                                         activebackground='#4BB2AE', relief=RAISED)
-        self.button_ph_plus.place(x=100, y=2)
+        self.button_ph_plus.bind(sequence="<Button-1>", func=lambda event: self.increase(self.label_ph_value, 1))
+        self.button_ph_plus.place(x=150, y=2)
         self.button_ph_minus = tk.Button(self.frame_set_ph, text="∨", font=("bold", 9), anchor=CENTER,
                                          height=1, width=3,
                                          bg='#8EF6F2',
                                          fg='#032222',
                                          activebackground='#4BB2AE', relief=RAISED)
-        self.button_ph_minus.place(x=100, y=30)
+        self.button_ph_minus.bind(sequence="<Button-1>", func=lambda event: self.decrease(self.label_ph_value, 1))
+        self.button_ph_minus.place(x=150, y=30)
 
-        self.frame_set_q = tk.Frame(master=self.frame_set_panel, width=235, height=59, bg='#7FADFC')
-        self.frame_set_q.place(x=235, y=60)
-        self.label_set_q = tk.Label(self.frame_set_q, text="Q=", height=4, width=10)
-        self.label_set_q.place(x=0, y=0)
-        self.button_q_plus = tk.Button(self.frame_set_q, text="∧", font=("bold", 9), anchor=CENTER,
-                                       height=1, width=3,
-                                       bg='#8EF6F2',
-                                       fg='#032222',
-                                       activebackground='#4BB2AE', relief=RAISED)
-        self.button_q_plus.place(x=100, y=2)
-        self.button_q_minus = tk.Button(self.frame_set_q, text="∨", font=("bold", 9), anchor=CENTER,
-                                        height=1, width=3,
-                                        bg='#8EF6F2',
-                                        fg='#032222',
-                                        activebackground='#4BB2AE', relief=RAISED)
-        self.button_q_minus.place(x=100, y=30)
+        self.frame_set_oxygen = tk.Frame(master=self.frame_set_panel, width=235, height=59, bg='#7FADFC')
+        self.frame_set_oxygen.place(x=235, y=60)
+        self.label_set_oxygen = tk.Label(self.frame_set_oxygen, text="O2=", height=4, width=10, anchor="e")
+        self.label_set_oxygen.place(x=0, y=0)
+        self.label_oxygen_value = tk.Label(self.frame_set_oxygen, text="0", height=4, width=8)
+        self.label_oxygen_value.place(x=80, y=0)
+        self.button_oxygen_plus = tk.Button(self.frame_set_oxygen, text="∧", font=("bold", 9), anchor=CENTER,
+                                            height=1, width=3,
+                                            bg='#8EF6F2',
+                                            fg='#032222',
+                                            activebackground='#4BB2AE', relief=RAISED)
+        self.button_oxygen_plus.bind(sequence="<Button-1>",
+                                      func=lambda event: self.increase(self.label_oxygen_value, 1))
+        self.button_oxygen_plus.place(x=150, y=2)
+        self.button_oxygen_minus = tk.Button(self.frame_set_oxygen, text="∨", font=("bold", 9), anchor=CENTER,
+                                             height=1, width=3,
+                                             bg='#8EF6F2',
+                                             fg='#032222',
+                                             activebackground='#4BB2AE', relief=RAISED)
+        self.button_oxygen_minus.bind(sequence="<Button-1>", func=lambda event: self.decrease(self.label_oxygen_value, 1))
+        self.button_oxygen_minus.place(x=150, y=30)
 
         self.frame_set_procent = tk.Frame(master=self.frame_set_panel, width=235, height=59, bg='#7FADFC')
         self.frame_set_procent.place(x=235, y=120)
-        self.label_set_procent = tk.Label(self.frame_set_procent, text="%=", height=4, width=10)
+        self.label_set_procent = tk.Label(self.frame_set_procent, text="%=", height=4, width=10, anchor="e")
         self.label_set_procent.place(x=0, y=0)
+        self.label_procent_value = tk.Label(self.frame_set_procent, text="0", height=4, width=8)
+        self.label_procent_value.place(x=80, y=0)
         self.button_procent_plus = tk.Button(self.frame_set_procent, text="∧", font=("bold", 9), anchor=CENTER,
                                              height=1, width=3,
                                              bg='#8EF6F2',
                                              fg='#032222',
                                              activebackground='#4BB2AE', relief=RAISED)
-        self.button_procent_plus.place(x=100, y=2)
+        self.button_procent_plus.bind(sequence="<Button-1>",
+                                       func=lambda event: self.increase(self.label_procent_value, 0))
+        self.button_procent_plus.place(x=150, y=2)
         self.button_procent_minus = tk.Button(self.frame_set_procent, text="∨", font=("bold", 9), anchor=CENTER,
                                               height=1, width=3,
                                               bg='#8EF6F2',
                                               fg='#032222',
                                               activebackground='#4BB2AE', relief=RAISED)
-        self.button_procent_minus.place(x=100, y=30)
+        self.button_procent_minus.bind(sequence="<Button-1>", func=lambda event: self.decrease(self.label_procent_value, 0))
+        self.button_procent_minus.place(x=150, y=30)
         self.button_reset = tk.Button(self.frame_set_panel, text="сброс", font=("bold", 12), anchor=CENTER,
                                       height=1, width=6,
                                       bg='#8EF6F2',
@@ -202,6 +233,12 @@ class AppConstructor(tk.Tk):
         self.label_left_time.place(x=0, y=43)
         self.label_current_time = tk.Label(self.frame_time, text="Текущее время: ", height=2, width=45, anchor="nw")
         self.label_current_time.place(x=0, y=83)
+        self.lbl = tk.Label(self.label_current_time, font=('calibri', 15, 'bold'),
+                            background='#7FADFC',
+                            foreground='black')
+
+        # Размещение Label в окне
+        self.lbl.place(x=150,y=0)
 
         self.frame_temperatures = tk.Frame(master=self.frame_info, width=355, height=85, bg='gray')
         self.frame_temperatures.place(x=0, y=0)
@@ -287,7 +324,20 @@ class AppConstructor(tk.Tk):
         self.tab3.place(x=320, y=0)
         self.tab4.place(x=480, y=0)
         self.tab5.place(x=640, y=0)
-        self.update_temp_label()
+        # self.update_temp_label()
+        self.time()
+
+    def increase(self, lbl_value, value):
+        if value == 0:
+            lbl_value['text'] = int(lbl_value['text']) + 1
+        else:
+            lbl_value['text'] = round(float(lbl_value['text']) + 0.1, 2)
+
+    def decrease(self, lbl_value,value):
+        if value == 0:
+            lbl_value['text'] = int(lbl_value['text']) - 1
+        else:
+            lbl_value['text'] = round(float(lbl_value['text']) - 0.1, 2)
 
     def replace(self):
         self.frame_stand.place_forget()
@@ -298,23 +348,29 @@ class AppConstructor(tk.Tk):
         self.frame_debug.place_forget()  # Скрываем frame_debug
         self.frame_menu.place(x=0, y=0)  # Возвращаем frame_menu на экран
         self.frame_stand.place(x=0, y=32)  # Возвращаем frame_stand на экран
-    def update_temp_label(self):
 
-        # Fetch new data
+    def time(self):
+        string = strftime('%H:%M:%S %p')
+        self.lbl.config(text=string)
+        self.lbl.after(1000, self.time)
 
-        self.ditc = ModbusMaster().read_data(1,0,6)
-
-        # Assuming the temperature value is at a specific index, e.g., 0
-        
-
-        # Update label_temp1 with the new value
-        self.label_temp1.configure(text=f"t1= {round(self.ditc[0] / 100, 2)}")
-        self.label_temp2.configure(text=f"t2= {round(self.ditc[1] / 100, 2)}")
-        self.label_temp3.configure(text=f"t3= {round(self.ditc[2] / 100, 2)}")
-        self.label_temp4.configure(text=f"t4= {round(self.ditc[3] / 100, 2)}")
-
-        # Call update_temp_label again after a delay (e.g., 1000ms)
-        self.after(1000, self.update_temp_label)
+    # def update_temp_label(self):
+    #
+    #     # Fetch new data
+    #
+    #     self.ditc = ModbusMaster().read_data(1,0,6)
+    #
+    #     # Assuming the temperature value is at a specific index, e.g., 0
+    #
+    #
+    #     # Update label_temp1 with the new value
+    #     self.label_temp1.configure(text=f"t1= {round(self.ditc[0] / 100, 2)}")
+    #     self.label_temp2.configure(text=f"t2= {round(self.ditc[1] / 100, 2)}")
+    #     self.label_temp3.configure(text=f"t3= {round(self.ditc[2] / 100, 2)}")
+    #     self.label_temp4.configure(text=f"t4= {round(self.ditc[3] / 100, 2)}")
+    #
+    #     # Call update_temp_label again after a delay (e.g., 1000ms)
+    #     self.after(1000, self.update_temp_label)
 
 
 if __name__ == "__main__":
